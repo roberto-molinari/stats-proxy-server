@@ -14,7 +14,13 @@ if(len(sys.argv) < 5 or sys.argv[1] != "--querytype" or not(sys.argv[2] == "batt
     quit()
 
 
+# the URL on sports data uses 'query' (for game queries), 'batter_query' (for hitter queries) or 'pitcher_query' (for pitcher queries) as the last 
+# element in the path before the query string.  Form that last element here, depending on what kind of query the user wants to do.
 query_type = sys.argv[2]
+if query_type != "game":
+    query_string = query_type + "_query"
+else:
+    query_string = "query"
 
 query_conditions = []
 query_conditions_string = ""
@@ -49,9 +55,9 @@ if sys.argv[i] == "--stats":
 return_data = ['hits', 'home runs', 'date']
 
 if data_columns_string != "":
-    full_url = base_url + query_type + "_query" + base_querystring + data_columns_string + "%40" + query_conditions_string
+    full_url = base_url + query_string + base_querystring + data_columns_string + "%40" + query_conditions_string
 else:
-    full_url = base_url + query_type + "_query" + base_querystring + query_conditions_string + data_columns_string
+    full_url = base_url + query_string + base_querystring + query_conditions_string + data_columns_string
 
 print full_url
 
@@ -79,4 +85,8 @@ for row in data_table.find_all('tr'):
             column_marker += 1
     row_marker += 1
 
-print new_table.to_json()
+print "\n\n---Raw Data---"
+print new_table
+
+print "\n\n---Grouped Data---"
+print new_table.groupby('team').describe()
