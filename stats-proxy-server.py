@@ -13,7 +13,6 @@ if(len(sys.argv) < 5 or sys.argv[1] != "--querytype" or not(sys.argv[2] == "batt
     print "usage: stats-proxy-server.py --querytype <batter|pitcher|game> --queryparams 'key1=value1' 'key2=value2' --stats stat1 stat2 ... statn"
     quit()
 
-
 # the URL on sports data uses 'query' (for game queries), 'batter_query' (for hitter queries) or 'pitcher_query' (for pitcher queries) as the last 
 # element in the path before the query string.  Form that last element here, depending on what kind of query the user wants to do.
 query_type = sys.argv[2]
