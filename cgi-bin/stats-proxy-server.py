@@ -19,7 +19,7 @@ print("<body>Hello world!!!</body>")
 
 
 query_string = form.getvalue('querytype')
-query_string = "game"
+query_string = "query"
 query_conditions = []
 query_conditions_string = ""
 query_conditions.append( form.getvalue('query1') )
@@ -108,32 +108,58 @@ print(full_url)
 
 # request = urllib2.Request("https://sportsdatabase.com/mlb/batter_query?output=default&su=1&ou=1&sdql=hits%2C+home+runs%2C+date%40name+%3D+Mookie+Betts+and+season%3D2019&submit=++S+D+Q+L+%21++", headers={'User-Agent' : ' Magic Browser'})
 request = urllib2.Request(full_url, headers={'User-Agent' : ' Magic Browser'})
+#request = urllib2.Request("https://www.google.com", headers={'User-Agent' : ' Magic Browser'} )
 page = urllib2.urlopen(request)
+#print("<br>")
+#print("---start page oontent---")
+#print("<br><br>")
+#print(page.read())
+#print("---end page content---")
+#print("<br><br>")
+#print("---http status code: ")
+#print(page.info())
+#print("<br><br>")
+
 soup = BeautifulSoup(page, "lxml")
 
-data_table = soup.find('table', {'id':'DT_Table'})
+#print("---start beautifulsoup---")
+#print("<br><br>")
+#print(soup.body)
+#print("<br><br>")
+#print("---end beautiful soup---")
+#print("<br><br>")
 
+# due to some odd issue with the find() function not working on my ubuntu server, i have to use find_all
+# and then terate over the one instance
+data_tables = soup.find_all("table", id="DT_Table", limit=1)
+#print(data_tables)
 
-foo = data_table.find_all('tr');
+try:
+	for data_table in data_tables:
+		print("---Found a table!---")
+		foo = data_table.find_all("tr");
 
-a = array.array('i',(i for i in range(0,len(foo))))
-new_table = pandas.DataFrame(columns=data_columns, index=a)
+		a = array.array('i',(i for i in range(0,len(foo))))
+		new_table = pandas.DataFrame(columns=data_columns, index=a)
 
-row_marker = 0
-for row in data_table.find_all('tr'):
-    if row_marker > 0: # skip the first row as it has non-data in it
-        column_marker = 0
-        columns = row.find_all('td')
+		row_marker = 0
+		for row in data_table.find_all("tr"):
+			if row_marker > 0: # skip the first row as it has non-data in it
+      				column_marker = 0
+        			columns = row.find_all("td")
 
-        for column in columns:
-            new_table.iat[row_marker,column_marker] = column.get_text().strip()
-            column_marker += 1
-    row_marker += 1
+        			for column in columns:
+            				new_table.iat[row_marker,column_marker] = column.get_text().strip()
+            				column_marker += 1
+    			row_marker += 1
 
-print("\n\n---Raw Data---")
-print(new_table)
+	print("<br><br>---Raw Data---<br>")
+	print(new_table.to_html())
 
-print("\n\n---Grouped Data---")
-print(new_table.groupby('team').describe())
+	print("<br><br>---Grouped Data---<br>")
+	print(new_table.groupby('team').describe().to_html())
+
+except Exception as e:
+	print("exception occured: " + str(e))
 print("</html")
 
