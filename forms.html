@@ -1,20 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>A simple form demonstration</title>
+    <title>Sports Data Query Language API Test page</title>
 </head>
 <body>
     <div style="text-align:center;">
-        <h1>User login</h1>
+        <h1>Sports Data Query</h1>
+	<h2>This provides forms for testing out the API to the Sports Database hosted on https://sportsdatbase.com</h2>
+	<h3>To try the API, enter a query using the fields below and the query will be executed on sportsdatabase.dom withe results being processed into a Pandas DataFrame on the server and sent back to the client</h3>
         <form action="/cgi-bin/stats-proxy-server.py" method="get">
-            querytype  :  <input type="text" name="username" style="text-align:center;">
-            <br><br>
-            param1   :  <input type="text" name="param1" style="text-align:center;">
-            param2   :  <input type="text" name="param2" style="text-align:center;">
-	    param3   :  <input type="text" name="param3" style="text-align:center;">
-	    data1    :  <input type="text" name="data1" style="text-align:center;">
-	    data2    :  <input type="text" name="data2" style="text-align:center;">
-	    data3    :  <input type="text" name="data3" style="text-align:center;">
+            querytype (must be one of game, batter or pitcher. Only MLB is supported for now)  :  <input type="text" name="querytype" style="text-align:center;">
+	<br>
+	<br>
+            query1 (must be of the format: key=value) : <input type="text" name="query1" style="text-align:center;">
+	<br>
+            query2 (must be of the format: key=value)  :  <input type="text" name="query2" style="text-align:center;">
+	<br>    
+	    query3 (must be of the format: key=value)  :  <input type="text" name="query3" style="text-align:center;">
+	<br>
+	    query4 (must be of the format: key=value)  :  <input type="text" name="query43" style="text-align:center;">
+	<br>
+	    query5 (must be of the format: key=value)  :  <input type="text" name="query5" style="text-align:center;">
+	<br>
+	    query6 (must be of the format: key=value)  :  <input type="text" name="query6" style="text-align:center;">
+	<br>
+	    query7 (must be of the format: key=value)  :  <input type="text" name="query7" style="text-align:center;">
+	<br>
+	    query8 (must be of the format: key=value)  :  <input type="text" name="query8" style="text-align:center;">
+	<br>
+	    query9 (must be of the format: key=value)  :  <input type="text" name="query9" style="text-align:center;">
+	<br>
+	    query10 (must be of the format: key=value)  :  <input type="text" name="query10" style="text-align:center;">
+	<br>    
+            data1  (must be of the format: key)  :  <input type="text" name="data1" style="text-align:center;">
+	<br>    
+            data2  (must be of the format: key)  :  <input type="text" name="data2" style="text-align:center;">
+	<br>    
+	    data3  (must be of the format: key)  :  <input type="text" name="data3" style="text-align:center;">
+        <br>
+            data4  (must be of the format: key)  :  <input type="text" name="data4" style="text-align:center;">
+	<br>    
+            data5  (must be of the format: key)  :  <input type="text" name="data5" style="text-align:center;">
+	<br>    
+	    data6  (must be of the format: key)  :  <input type="text" name="data6" style="text-align:center;">
 <br><br><br>
             <input type="submit" value="Submit">
         </form>

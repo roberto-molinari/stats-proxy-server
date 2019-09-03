@@ -7,46 +7,75 @@ import sys
 
 from bs4 import BeautifulSoup
 
+# define some constants
+MAX_QUERY_PARAMS=10
+MAX_DATA_FIELDS=10
+
 # -- begin code for handling as part of CGI execution
 cgitb.enable()
 
 form = cgi.FieldStorage()
 
+# print the header and start of the body tag for the HTML that we will return to the client
 print("Contet-Type:text/html\r\n\r\n")
 print("<html>")
-print("<head><title>Hello world</title></head>")
-print("<body>Hello world!!!</body>")
+print("<head><title>Results of your SDQL Query</title></head>")
+print("<body>")
 
-
+# iterate over the query params and get them into the correct format for passing to the server
 query_string = form.getvalue('querytype')
 query_string = "query"
 query_conditions = []
 query_conditions_string = ""
-query_conditions.append( form.getvalue('query1') )
-query_conditions_string += form.getvalue('query1').replace(" ", "%20")
-query_conditions_string += "%20and%20"
+i = 1
+while i < MAX_QUERY_PARAMS:
+	query_key_string = "query"+str(i)
+	i+=1
+	if form.getvalue( query_key_string ):
+		query_conditions.append( form.getvalue( query_key_string ) )
+		query_conditions_string += form.getvalue( query_key_string ).replace(" ", "%20")
+		if i < MAX_QUERY_PARAMS:
+			next_query_key_string = "query"+str(i)
+			if form.getvalue( next_query_key_string ): 
+				query_conditions_string += "%20and%20"
+	
 
-query_conditions.append( form.getvalue('query2') )
-query_conditions_string += form.getvalue('query2').replace(" ", "%20")
-query_conditions_string += "%20and%20"
-
-query_conditions.append( form.getvalue('query3') )
-query_conditions_string += form.getvalue('query3').replace(" ", "%20")
-
+#query_conditions.append( form.getvalue('query1') )
+#query_conditions_string += form.getvalue('query1').replace(" ", "%20")
+#query_conditions_string += "%20and%20"
+#
+#query_conditions.append( form.getvalue('query2') )
+#query_conditions_string += form.getvalue('query2').replace(" ", "%20")
+#query_conditions_string += "%20and%20"
+#
+#query_conditions.append( form.getvalue('query3') )
+#query_conditions_string += form.getvalue('query3').replace(" ", "%20")
+#
 
 data_columns = []
 data_columns_string = ""
+i = 1
+while i < MAX_DATA_FIELDS:
+	data_key_string = "data"+str(i)
+	i+=1
+	if form.getvalue( data_key_string ):
+		data_columns.append( form.getvalue( data_key_string ) )
+		data_columns_string += form.getvalue( data_key_string ).replace(" ", "%20")
+		if i < MAX_DATA_FIELDS:
+			next_data_key_string = "data"+str(i)
+			if form.getvalue( next_data_key_string ):
+				data_columns_string += "%2C"
+	
+#data_columns.append( form.getvalue('data1') )
+#data_columns_string += form.getvalue('data1').replace(" ", "%20")
+#data_columns_string += "%2C"
 
-data_columns.append( form.getvalue('data1') )
-data_columns_string += form.getvalue('data1').replace(" ", "%20")
-data_columns_string += "%2C"
+#data_columns.append( form.getvalue('data2') )
+#data_columns_string += form.getvalue('data2').replace(" ", "%20")
+#data_columns_string += "%2C"
 
-data_columns.append( form.getvalue('data2') )
-data_columns_string += form.getvalue('data2').replace(" ", "%20")
-data_columns_string += "%2C"
-
-data_columns.append( form.getvalue('data3') )
-data_columns_string += form.getvalue('data3').replace(" ", "%20")
+#data_columns.append( form.getvalue('data3') )
+#data_columns_string += form.getvalue('data3').replace(" ", "%20")
 
 
 
@@ -108,35 +137,16 @@ print(full_url)
 
 # request = urllib2.Request("https://sportsdatabase.com/mlb/batter_query?output=default&su=1&ou=1&sdql=hits%2C+home+runs%2C+date%40name+%3D+Mookie+Betts+and+season%3D2019&submit=++S+D+Q+L+%21++", headers={'User-Agent' : ' Magic Browser'})
 request = urllib2.Request(full_url, headers={'User-Agent' : ' Magic Browser'})
-#request = urllib2.Request("https://www.google.com", headers={'User-Agent' : ' Magic Browser'} )
 page = urllib2.urlopen(request)
-#print("<br>")
-#print("---start page oontent---")
-#print("<br><br>")
-#print(page.read())
-#print("---end page content---")
-#print("<br><br>")
-#print("---http status code: ")
-#print(page.info())
-#print("<br><br>")
-
 soup = BeautifulSoup(page, "lxml")
 
-#print("---start beautifulsoup---")
-#print("<br><br>")
-#print(soup.body)
-#print("<br><br>")
-#print("---end beautiful soup---")
-#print("<br><br>")
 
 # due to some odd issue with the find() function not working on my ubuntu server, i have to use find_all
 # and then terate over the one instance
 data_tables = soup.find_all("table", id="DT_Table", limit=1)
-#print(data_tables)
 
 try:
 	for data_table in data_tables:
-		print("---Found a table!---")
 		foo = data_table.find_all("tr");
 
 		a = array.array('i',(i for i in range(0,len(foo))))
@@ -161,5 +171,6 @@ try:
 
 except Exception as e:
 	print("exception occured: " + str(e))
-print("</html")
+print("</body>")
+print("</html>")
 
