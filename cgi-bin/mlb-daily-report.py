@@ -21,8 +21,6 @@ print("<body>")
 base_url = "https://sportsdatabase.com/mlb/query"
 base_querystring = "?output=default&su=1&ou=1&submit=++S+D+Q+L+%21++&sdql="
 full_url = base_url + base_querystring + "date=" + today_date_string
-#print(full_url)
-#print("<br>")
 
 request = urllib2.Request(full_url, headers={'User-Agent' : ' Magic Browser'})
 page = urllib2.urlopen(request)
@@ -54,16 +52,25 @@ try:
 				starter_total_query_string = "starter=" + starter.replace(" ", "%20") + "+and+total=" + str(total)
 
 				full_url = base_url + base_querystring + "season=2019+and+" + starter_total_query_string
-				#print(full_url)
-				#print("<br>")
+				
 				time.sleep(2)
 				request2 = urllib2.Request(full_url, headers={'User-Agent' : 'Mozilla/5.0'})
 				page2 = urllib2.urlopen(request2)
 				soup2 = BeautifulSoup(page2, "lxml")
 				pitcher_html_table = soup2.find_all("table", id="DT_Table", limit=1)[0]
 				pitcher_table = pd.read_html(pitcher_html_table.prettify())[0]
+				pitcher_table.drop(columns = ['Link', 'Day', 'Site', 'Team', 'SUm', 'Hits', 'Errors', 'BL', 'Innings'], inplace=True)
+				pitcher_table.drop( pitcher_table.tail(1).index, inplace=True )
+
+				total_rows = len( pitcher_table )
+				if total_rows >=1:
+					over_count = len( pitcher_table[ pitcher_table["O/U"].str.contains('O')] )
+					percentage_over_message = str( (float( over_count ) / float( total_rows )) * 100.0 ) + "% of the time"
+				else:
+					percentage_over_message = 'never'
+			
 				print("<br>")
-				print("====" + starter + " at line " + str(total))
+				print("====" + starter + " at line " + str(total) + " hit the over " + percentage_over_message )
 				print("<br>")
 				print(pitcher_table.to_html())
 				#print(pitcher_table[0].to_html())
@@ -74,4 +81,9 @@ except Exception as e:
 print("</body>")
 print("</html>")
 
+sys.stdout.flush()
+sys.stdout.close()
+
+sys.stderr.flush()
+sys.stderr.close()
 
