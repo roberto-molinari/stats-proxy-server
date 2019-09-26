@@ -2,8 +2,13 @@
 import cgi, cgitb
 import array
 import urllib2
+import os
 import pandas
 import sys
+
+sys.path.append(os.path.realpath('lib'))
+
+from htmlhelpers import start_html_document, end_html_document
 
 from bs4 import BeautifulSoup
 
@@ -17,10 +22,7 @@ cgitb.enable()
 form = cgi.FieldStorage()
 
 # print the header and start of the body tag for the HTML that we will return to the client
-print("Contet-Type:text/html\r\n\r\n")
-print("<html>")
-print("<head><title>Results of your SDQL Query</title></head>")
-print("<body>")
+start_html_document()
 
 # iterate over the query params and get them into the correct format for passing to the server
 query_string = form.getvalue('querytype')
@@ -171,6 +173,5 @@ try:
 
 except Exception as e:
 	print("exception occured: " + str(e))
-print("</body>")
-print("</html>")
 
+end_html_document()

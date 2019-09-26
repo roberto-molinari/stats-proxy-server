@@ -2,10 +2,16 @@
 import array
 import datetime
 import urllib2
+import os
 import pandas as pd
 import sys
 import time
 import traceback
+
+sys.path.append(os.path.realpath('lib'))
+
+from htmlhelpers import start_html_document, end_html_document
+
 
 from bs4 import BeautifulSoup
 
@@ -29,12 +35,8 @@ today = datetime.datetime.now()
 today_date_string = today.strftime("%Y%m%d")
 
 # print the header and start of the body tag for the HTML that we will return to the client
-print("Contet-Type:text/html\r\n\r\n")
-print("<html>")
-print("<head><title>Results of your SDQL Query</title></head>")
-print("<body>")
+start_html_document()
 
-base_url = "https://sportsdatabase.com/mlb/query"
 base_querystring = "?output=default&su=1&ou=1&submit=++S+D+Q+L+%21++&sdql="
 full_url = base_url + base_querystring + "date=" + today_date_string
 
@@ -64,7 +66,6 @@ try:
 			starter_name = starter_name[0:-4]
 			over_total = row['Total']
 			if over_total != over_total:
-				xxx=5
 				#print("===" + starter_name + " no total set yet.  skipping.")
 				#print("<br><br>")
  			else:
@@ -92,12 +93,6 @@ try:
 				pitcher_data = PitcherData( pitcher_table, starter_name, over_total, over_percentage )
 				pitcher_list.append( pitcher_data )
 
-				#print("<br>")
-				#print("====" + starter + " at line " + str(total) + " hit the over " + percentage_over_message )
-				#print("<br>")
-				#print(pitcher_table.to_html())
-				#print(pitcher_table[0].to_html())
-				#print("<br>")
 
 except Exception as e:
 	print("exception occured: " + str(e))
@@ -110,13 +105,4 @@ for pitcher_data in pitcher_list:
 		print("<br><br>")
 	i = i + 1
 
-
-print("</body>")
-print("</html>")
-
-sys.stdout.flush()
-sys.stdout.close()
-
-sys.stderr.flush()
-sys.stderr.close()
-
+end_html_document()
