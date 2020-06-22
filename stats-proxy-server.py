@@ -84,8 +84,8 @@ for row in data_table.find_all('tr'):
             column_marker += 1
     row_marker += 1
 
+print "\n\n---Grouped Data---"
+print new_table.groupby('team').sort_values(by=['count']).describe()
+
 print "\n\n---Raw Data---"
 print new_table
-
-print "\n\n---Grouped Data---"
-print new_table.groupby('team').describe()

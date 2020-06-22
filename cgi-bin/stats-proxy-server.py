@@ -24,9 +24,17 @@ form = cgi.FieldStorage()
 # print the header and start of the body tag for the HTML that we will return to the client
 start_html_document()
 
+# get the name of the league that we're going to query (mlb, nfl, nhl, etc.)
+league_string = form.getvalue('league-select')
+
+# get the type of query that we're going to do (game or player)
+query_type = form.getvalue('query-type-select')
+if query_type != "game":
+   query_type_string = query_type + "_query"
+else:
+   query_type_string = "query"
+
 # iterate over the query params and get them into the correct format for passing to the server
-query_string = form.getvalue('querytype')
-query_string = "query"
 query_conditions = []
 query_conditions_string = ""
 i = 1
@@ -42,18 +50,7 @@ while i < MAX_QUERY_PARAMS:
 				query_conditions_string += "%20and%20"
 	
 
-#query_conditions.append( form.getvalue('query1') )
-#query_conditions_string += form.getvalue('query1').replace(" ", "%20")
-#query_conditions_string += "%20and%20"
-#
-#query_conditions.append( form.getvalue('query2') )
-#query_conditions_string += form.getvalue('query2').replace(" ", "%20")
-#query_conditions_string += "%20and%20"
-#
-#query_conditions.append( form.getvalue('query3') )
-#query_conditions_string += form.getvalue('query3').replace(" ", "%20")
-#
-
+# iterate over the data columns the user has requested and get them into the correct format for passing to the server
 data_columns = []
 data_columns_string = ""
 i = 1
@@ -68,20 +65,11 @@ while i < MAX_DATA_FIELDS:
 			if form.getvalue( next_data_key_string ):
 				data_columns_string += "%2C"
 	
-#data_columns.append( form.getvalue('data1') )
-#data_columns_string += form.getvalue('data1').replace(" ", "%20")
-#data_columns_string += "%2C"
 
-#data_columns.append( form.getvalue('data2') )
-#data_columns_string += form.getvalue('data2').replace(" ", "%20")
-#data_columns_string += "%2C"
-
-#data_columns.append( form.getvalue('data3') )
-#data_columns_string += form.getvalue('data3').replace(" ", "%20")
-
-
-
-base_url = "https://sportsdatabase.com/mlb/"
+# get the hostname, patn ahd start of the query string set.  the format of the request URL is:
+#
+#     https://sportsdatabase.com/<league-name>/
+base_url = "https://sportsdatabase.com/" + league_string + "/"
 base_querystring = "?output=default&su=1&ou=1&submit=++S+D+Q+L+%21++&sdql="
 
 # -- begin code for executing from command line
@@ -131,9 +119,9 @@ base_querystring = "?output=default&su=1&ou=1&submit=++S+D+Q+L+%21++&sdql="
 return_data = ['hits', 'home runs', 'date']
 
 if data_columns_string != "":
-    full_url = base_url + query_string + base_querystring + data_columns_string + "%40" + query_conditions_string
+    full_url = base_url + query_type_string + base_querystring + data_columns_string + "%40" + query_conditions_string
 else:
-    full_url = base_url + query_string + base_querystring + query_conditions_string + data_columns_string
+    full_url = base_url + query_type_string + base_querystring + query_conditions_string + data_columns_string
 
 print(full_url)
 
@@ -165,11 +153,16 @@ try:
             				column_marker += 1
     			row_marker += 1
 
+	print("<br><br>---Grouped Data---<br>")
+	print(new_table.groupby('team').count().sort_values(by=['goals'], ascending=False).to_html())
+
 	print("<br><br>---Raw Data---<br>")
 	print(new_table.to_html())
 
-	print("<br><br>---Grouped Data---<br>")
-	print(new_table.groupby('team').describe().to_html())
+
+	# print(new_table.groupby('team').sort_values('count').describe().to_html())
+	# print(new_table.groupby('team').describe().to_html())
+
 
 except Exception as e:
 	print("exception occured: " + str(e))

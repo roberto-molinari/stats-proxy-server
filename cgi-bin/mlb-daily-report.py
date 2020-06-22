@@ -37,6 +37,7 @@ today_date_string = today.strftime("%Y%m%d")
 # print the header and start of the body tag for the HTML that we will return to the client
 start_html_document()
 
+base_url = "https://sportsdatabase.com/mlb/query"
 base_querystring = "?output=default&su=1&ou=1&submit=++S+D+Q+L+%21++&sdql="
 full_url = base_url + base_querystring + "date=" + today_date_string
 
@@ -65,10 +66,7 @@ try:
 			starter_name = row['Starter']
 			starter_name = starter_name[0:-4]
 			over_total = row['Total']
-			if over_total != over_total:
-				#print("===" + starter_name + " no total set yet.  skipping.")
-				#print("<br><br>")
- 			else:
+			if over_total == over_total:
 				starter_total_query_string = "starter=" + starter_name.replace(" ", "%20") + "+and+total=" + str(over_total)
 
 				full_url = base_url + base_querystring + "season=2019+and+" + starter_total_query_string
