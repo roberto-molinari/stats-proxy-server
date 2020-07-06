@@ -9,12 +9,8 @@ import sys
 sys.path.append(os.path.realpath('lib'))
 
 from htmlhelpers import start_html_document, end_html_document
-
+from sportsqueryclass import SportsQuery
 from bs4 import BeautifulSoup
-
-# define some constants
-MAX_QUERY_PARAMS=10
-MAX_DATA_FIELDS=10
 
 # -- begin code for handling as part of CGI execution
 cgitb.enable()
@@ -24,89 +20,15 @@ form = cgi.FieldStorage()
 # print the header and start of the body tag for the HTML that we will return to the client
 start_html_document()
 
-# get the name of the league that we're going to query (mlb, nfl, nhl, etc.)
-league_string = form.getvalue('league-select')
+# initialize the object that holds all the information about the query the user submitted.
+incoming_query = SportsQuery(form)
 
-# get the type of query that we're going to do (game or player)
-query_type = form.getvalue('query-type-select')
-if query_type != "game":
-   query_type_string = query_type + "_query"
-else:
-   query_type_string = "query"
-
-# iterate over the query params and get them into the correct format for passing to the server
-query_conditions = []
-query_conditions_string = ""
-i = 1
-while i < MAX_QUERY_PARAMS:
-	query_key_string = "query"+str(i)
-	i+=1
-	if form.getvalue( query_key_string ):
-		query_conditions.append( form.getvalue( query_key_string ) )
-		query_conditions_string += form.getvalue( query_key_string ).replace(" ", "%20")
-		if i < MAX_QUERY_PARAMS:
-			next_query_key_string = "query"+str(i)
-			if form.getvalue( next_query_key_string ): 
-				query_conditions_string += "%20and%20"
-	
-
-# iterate over the data columns the user has requested and get them into the correct format for passing to the server
-data_columns = []
-data_columns_string = ""
-i = 1
-while i < MAX_DATA_FIELDS:
-	data_key_string = "data"+str(i)
-	i+=1
-	if form.getvalue( data_key_string ):
-		data_columns.append( form.getvalue( data_key_string ) )
-		data_columns_string += form.getvalue( data_key_string ).replace(" ", "%20")
-		if i < MAX_DATA_FIELDS:
-			next_data_key_string = "data"+str(i)
-			if form.getvalue( next_data_key_string ):
-				data_columns_string += "%2C"
-	
 
 # get the hostname, patn ahd start of the query string set.  the format of the request URL is:
 #
 #     https://sportsdatabase.com/<league-name>/
-base_url = "https://sportsdatabase.com/" + league_string + "/"
+base_url = "https://sportsdatabase.com/" + incoming_query.league + "/"
 base_querystring = "?output=default&su=1&ou=1&submit=++S+D+Q+L+%21++&sdql="
-
-# -- begin code for executing from command line
-# usage: stats-proxy-server.py --querytype <batter|pitcher|game> --query 'key1=value1' 'key2=value2' --stats stat1 stat2 ... statn 
-##if(len(sys.argv) < 5 or sys.argv[1] != "--querytype" or not(sys.argv[2] == "batter" or sys.argv[2] == "pitcher" or sys.argv[2] == "game")):
-##    print "usage: stats-proxy-server.py --querytype <batter|pitcher|game> --queryparams 'key1=value1' 'key2=value2' --stats stat1 stat2 ... statn"
-##    quit()
-
-# the URL on sports data uses 'query' (for game queries), 'batter_query' (for hitter queries) or 'pitcher_query' (for pitcher queries) as the last 
-# element in the path before the query string.  Form that last element here, depending on what kind of query the user wants to do.
-##query_type = sys.argv[2]
-##if query_type != "game":
-##   query_string = query_type + "_query"
-##else:
-##    query_string = "query"
-
-##query_conditions = []
-##query_conditions_string = ""
-##i = 4
-##while i < len(sys.argv) and sys.argv[i] != "--stats":
-##    query_conditions.append( sys.argv[i])
-##    query_conditions_string += sys.argv[i].replace(" ", "%20")
-##    i += 1
-##    if i < len(sys.argv) and sys.argv[i] != "--stats":
-##        query_conditions_string += "%20and%20"
-
-
-##data_columns = []
-##data_columns_string = ""
-##if sys.argv[i] == "--stats":
-##    i += 1
-##    while i < len(sys.argv):
-##        data_columns.append(sys.argv[i])
-##        data_columns_string += sys.argv[i].replace(" ", "%20")
-##        i += 1
-##        if i < len(sys.argv):
-##            data_columns_string += "%2C"
 
     
 # the format of the URL will be:
@@ -118,10 +40,10 @@ base_querystring = "?output=default&su=1&ou=1&submit=++S+D+Q+L+%21++&sdql="
 #   - queryparam1 ... queryparamN = comes from the --query param
 return_data = ['hits', 'home runs', 'date']
 
-if data_columns_string != "":
-    full_url = base_url + query_type_string + base_querystring + data_columns_string + "%40" + query_conditions_string
+if incoming_query.data_columns != "":
+    full_url = base_url + incoming_query.query_type + base_querystring + incoming_query.data_columns + "%40" + incoming_query.query_parameters
 else:
-    full_url = base_url + query_type_string + base_querystring + query_conditions_string + data_columns_string
+    full_url = base_url + incoming_query.query_type + base_querystring + incoming_query.query_parameters
 
 print(full_url)
 
@@ -140,7 +62,7 @@ try:
 		foo = data_table.find_all("tr");
 
 		a = array.array('i',(i for i in range(0,len(foo))))
-		new_table = pandas.DataFrame(columns=data_columns, index=a)
+		new_table = pandas.DataFrame(columns=incoming_query.data_columns_list, index=a)
 
 		row_marker = 0
 		for row in data_table.find_all("tr"):
@@ -154,7 +76,7 @@ try:
     			row_marker += 1
 
 	print("<br><br>---Grouped Data---<br>")
-	print(new_table.groupby('team').count().sort_values(by=['goals'], ascending=False).to_html())
+	print(new_table.groupby(incoming_query.group_column).count().sort_values(by=[incoming_query.sort_column], ascending=False).to_html())
 
 	print("<br><br>---Raw Data---<br>")
 	print(new_table.to_html())
