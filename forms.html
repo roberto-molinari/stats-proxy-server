@@ -7,7 +7,7 @@
 	<div style="text-align:center;">
 		<h1>Sports Data Query</h1>
 		<h2>This provides forms for testing out the API to the Sports Database hosted on https://sportsdatbase.com</h2>
-		<h3>To try the API, enter a query using the fields below and the query will be executed on sportsdatabase.dom withe results being processed into a Pandas DataFrame on the server and sent back to the client</h3>
+		<h3>To try the API, enter a query using the fields below and the query will be executed on sportsdatabase.com with tje results being processed into a Pandas DataFrame on the server and sent back to the client</h3>
 		<form action="/cgi-bin/stats-proxy-server.py" method="get">
 			Pick which sport to query
 			<select id="league-select" name="league-select" onchange="updateQueryTypeList(this.value)">
@@ -17,14 +17,21 @@
 				<option value="mlb">MLB</option>
 			</select>
 			<br>
-			querytype (only for use with MLB, must be one of game, batter or pitcher.)  :  
+			Pick the type of query:  
 			<select id="query-type-select" name="query-type-select" >
-				<option value="" disabled selected>Select</option>
+				<option>game</option>
 			</select>
+			<br>
+			Pick how you want to process the results of the query:
+			<select id="results-handling-select" name="results-handling-select">
+				<option value="create-aggregated-table">Create Aggregated Table</option>
+				<option value="process-payouts">Process Payouts</option>
+			</select>
+
 			<!-- <input type="text" name="querytype" style="text-align:center;"> -->
 			<br>
 			<br>
-				query1 (must be of the format: key=value) : <input type="text" name="query1" style="text-align:center;">
+				query1 (must be of the format: key=value) :  <input type="text" name="query1" style="text-align:center;">
 			<br>
 				query2 (must be of the format: key=value)  :  <input type="text" name="query2" style="text-align:center;">
 			<br>    
@@ -44,17 +51,41 @@
 			<br>
 				query10 (must be of the format: key=value)  :  <input type="text" name="query10" style="text-align:center;">
 			<br>    
-				data1  (must be of the format: key)  :  <input type="text" name="data1" style="text-align:center;">
+				data1  (must be of the format: key)  :  <input type="text" name="data1" style="text-align:center;">  
+				<input type="radio" id="data1sort" value="0" name="sort"> 
+				<label for="data1sort">Sort</label>
+				<input type="radio" id="data1group" value="0" name="group"> 
+				<label for="data1group">Group</label>
 			<br>    
 				data2  (must be of the format: key)  :  <input type="text" name="data2" style="text-align:center;">
+				<input type="radio" id="data2sort" value="1" name="sort"> 
+				<label for="data2sort">Sort</label>
+				<input type="radio" id="data2group" value="1" name="group"> 
+				<label for="data2group">Group</label>
 			<br>    
 				data3  (must be of the format: key)  :  <input type="text" name="data3" style="text-align:center;">
+				<input type="radio" id="data3sort" value="2" name="sort"> 
+				<label for="data3sort">Sort</label>
+				<input type="radio" id="data3group" value="2" name="group"> 
+				<label for="data3group">Group</label>
 			<br>
 				data4  (must be of the format: key)  :  <input type="text" name="data4" style="text-align:center;">
+				<input type="radio" id="data4sort" value="3" name="sort"> 
+				<label for="data4sort">Sort</label>
+				<input type="radio" id="data4group" value="3" name="group"> 
+				<label for="data4group">Group</label>
 			<br>    
 				data5  (must be of the format: key)  :  <input type="text" name="data5" style="text-align:center;">
+				<input type="radio" id="data5sort" value="4" name="sort"> 
+				<label for="data5sort">Sort</label>
+				<input type="radio" id="data5group" value="4" name="group"> 
+				<label for="data5group">Group</label>
 			<br>    
 				data6  (must be of the format: key)  :  <input type="text" name="data6" style="text-align:center;">
+				<input type="radio" id="data6sort" value="5" name="sort"> 
+				<label for="data6sort">Sort</label>
+				<input type="radio" id="data6group" value="5" name="group"> 
+				<label for="data6group">Group</label>
 			<br>
 			<br>
 			<br>
