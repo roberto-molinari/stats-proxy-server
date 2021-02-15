@@ -8,11 +8,20 @@ MAX_DATA_FIELDS=10
 class SportsQuery:
     def __init__(self, form):
         self.form = form
+
+        # set defaults
+        self.query_type = "query"
+        self.results_type = "raw"
+        self.sort_column = ""
+        self.group_colum = ""
+
         # get the name of the league that we're going to query (mlb, nfl, nhl, etc.)
         self.league = form.getvalue('league-select')
 
         self.initializeQueryType()
 
+        self.initializeResultsHandlingType()
+        
         self.initializeQueryParameters()
 
         self.initializeDataColumns()
@@ -28,6 +37,11 @@ class SportsQuery:
             self.query_type = query_type_value + "_query"
         else:
             self.query_type = "query"
+
+    def initializeResultsHandlingType(self):
+        # get the way we're going to process results (i.e. aggregated, raw, etc.)
+        results_type_value = self.form.getvalue('results-handling-select')
+        self.results_type = results_type_value
 
 
     def initializeQueryParameters(self):
@@ -62,7 +76,13 @@ class SportsQuery:
                         self.data_columns += "%2C"
 
     def initializeSortColumn(self):
-        self.sort_column=self.data_columns_list[ int(self.form.getvalue("sort") ) ]
+        try:
+            column_index = int(self.form.getvalue("sort"))
+        except Exception as e:
+            column_index = 0
+
+        self.sort_column=self.data_columns_list[ column_index ]
 
     def initializeGroupColumn(self):
-        self.group_column=self.data_columns_list[ int(self.form.getvalue("group") ) ]
+        if self.results_type == "aggregated":
+            self.group_column=self.data_columns_list[ int(self.form.getvalue("group") ) ]

@@ -75,11 +75,13 @@ try:
             				column_marker += 1
     			row_marker += 1
 
-	print("<br><br>---Grouped Data---<br>")
-	print(new_table.groupby(incoming_query.group_column).count().sort_values(by=[incoming_query.sort_column], ascending=False).to_html())
-
-	print("<br><br>---Raw Data---<br>")
-	print(new_table.to_html())
+	if incoming_query.results_type == "aggregated":
+		print("<br><br>---Grouped Data---<br>")
+		print(new_table.groupby(incoming_query.group_column).count().sort_values(by=[incoming_query.sort_column], ascending=False).to_html())
+	
+	if incoming_query.results_type == "raw":
+		print("<br><br>---Raw Data---<br>")
+		print(new_table.sort_values(by=[incoming_query.sort_column], ascending=False).to_html())
 
 
 	# print(new_table.groupby('team').sort_values('count').describe().to_html())
