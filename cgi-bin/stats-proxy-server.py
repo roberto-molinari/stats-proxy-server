@@ -1,13 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import cgi, cgitb
 import array
-import urllib2
+#import urllib2
+import urllib
 import os
 import pandas
 import sys
 
 sys.path.append(os.path.realpath('lib'))
 
+from urllib.request import urlopen
 from htmlhelpers import start_html_document, end_html_document
 from sportsqueryclass import SportsQuery
 from bs4 import BeautifulSoup
@@ -45,13 +47,29 @@ if incoming_query.data_columns != "":
 else:
     full_url = base_url + incoming_query.query_type + base_querystring + incoming_query.query_parameters
 
+print(incoming_query.query_parameters)
+
+print("-----")
+
 print(full_url)
 
-# request = urllib2.Request("https://sportsdatabase.com/mlb/batter_query?output=default&su=1&ou=1&sdql=hits%2C+home+runs%2C+date%40name+%3D+Mookie+Betts+and+season%3D2019&submit=++S+D+Q+L+%21++", headers={'User-Agent' : ' Magic Browser'})
-request = urllib2.Request(full_url, headers={'User-Agent' : ' Magic Browser'})
-page = urllib2.urlopen(request)
-soup = BeautifulSoup(page, "lxml")
+print("-----")
 
+# request = urllib2.Request("https://sportsdatabase.com/mlb/batter_query?output=default&su=1&ou=1&sdql=hits%2C+home+runs%2C+date%40name+%3D+Mookie+Betts+and+season%3D2019&submit=++S+D+Q+L+%21++", headers={'User-Agent' : ' Magic Browser'})
+
+# the following two lines were the urllib2 version (for python 2) of the code to pull down the HTML file from the site.
+# request = urllib2.Request(full_url, headers={'User-Agent' : ' Magic Browser'})
+# page = urllib2.urlopen(request)
+
+# the following one line is the urllib version (for python 3) of the code to pull down the HTML file from the site.
+# python 2 version - page = urlopen( full_url, headers = {'User-Agent' : ' Magic Browser'})
+request = urllib.request.Request( full_url )
+request.add_header("User-Agent", "Magic Browser")
+response=urllib.request.urlopen(request)
+page = response.read()
+
+# create some soupe
+soup = BeautifulSoup(page, "html.parser")
 
 # due to some odd issue with the find() function not working on my ubuntu server, i have to use find_all
 # and then terate over the one instance
@@ -67,13 +85,13 @@ try:
 		row_marker = 0
 		for row in data_table.find_all("tr"):
 			if row_marker > 0: # skip the first row as it has non-data in it
-      				column_marker = 0
-        			columns = row.find_all("td")
+					column_marker = 0
+					columns = row.find_all("td")
 
-        			for column in columns:
-            				new_table.iat[row_marker,column_marker] = column.get_text().strip()
-            				column_marker += 1
-    			row_marker += 1
+					for column in columns:
+							new_table.iat[row_marker,column_marker] = column.get_text().strip()
+							column_marker += 1
+			row_marker += 1
 
 	if incoming_query.results_type == "aggregated":
 		print("<br><br>---Grouped Data---<br>")
